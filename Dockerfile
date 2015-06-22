@@ -78,6 +78,3 @@ EXPOSE 4447 69/udp
 
 VOLUME ["/var/lib/opsi/","/etc/opsi"]
 
-
-CMD ['/usr/bin/opsiconfd']
-
