@@ -19,9 +19,9 @@ ENV tmp_opsiconfd_cnf="/tmp/tmp_opsiconfd_cnf"
 
 RUN apt-get update
 
-RUN apt-get install -y -qq hostname apt-utils iputils-ping openssl net-tools openssh-client
+RUN apt-get install -y -qq hostname apt-utils iputils-ping openssl net-tools openssh-client vim
 
-RUN apt-get install -y -qq wget lsof host python-mechanize p7zip-full cabextract openbsd-inetd pigz
+RUN apt-get install -y -qq wget lsof host python-mechanize p7zip-full cabextract openbsd-inetd pigz cpio
 
 RUN apt-get install -y -qq samba samba-common smbclient cifs-utils samba-doc
 
@@ -76,5 +76,5 @@ RUN echo "127.0.0.1 $HOSTNAME" > /etc/hosts; apt-get install -y -qq opsi-confige
 
 EXPOSE 4447 69/udp
 
-VOLUME ["/var/lib/opsi/","/etc/opsi"]
+VOLUME ["/var/lib/opsi/", "/etc/opsi"]
 
