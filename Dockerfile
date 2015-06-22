@@ -59,12 +59,10 @@ RUN echo "RANDFILE = $tmp_opsiconfd_rand" 	>  $tmp_opsiconfd_cnf ;\
 	echo "nsCertType = server" 				>> $tmp_opsiconfd_cnf
 
 RUN	dd if=/dev/urandom of=$tmp_opsiconfd_rand count=1 2>/dev/null
-#
+
 RUN openssl req -new -x509 -days 1000 -nodes -config $tmp_opsiconfd_cnf -out /etc/opsi/opsiconfd.pem -keyout /etc/opsi/opsiconfd.pem
 RUN	openssl gendh -rand $tmp_opsiconfd_rand 512 >>/etc/opsi/opsiconfd.pem
 RUN	openssl x509 -subject -dates -fingerprint -noout -in /etc/opsi/opsiconfd.pem
-
-#RUN echo "opsiconfd   opsiconfd/cert_commonname string $HOSTNAME" | debconf-set-selections
 
 RUN apt-get -y remove tftpd
 
@@ -76,10 +74,10 @@ RUN echo "127.0.0.1	$HOSTNAME" > /etc/hosts; apt-get install -y -qq opsi-depotse
 
 RUN echo "127.0.0.1	$HOSTNAME" > /etc/hosts; apt-get install -y -qq opsi-configed
 
-EXPOSE 4447
-EXPOSE 69/udp
+EXPOSE 4447 69/udp
 
-VOLUME /var/lib/opsi/
+VOLUME ["/var/lib/opsi/","/etc/opsi"]
 
-VOLUME /etc/opsi
+
+CMD ['opsiconfd']
 
