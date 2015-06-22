@@ -12,9 +12,9 @@ ENV HOSTNAME opsi.docker.lan
 
 RUN apt-get update
 
-RUN apt-get install -y wget lsof host python-mechanize p7zip-full cabextract openbsd-inetd pigz
+RUN apt-get install -y -qq wget lsof host python-mechanize p7zip-full cabextract openbsd-inetd pigz
 
-RUN apt-get install -y samba samba-common smbclient cifs-utils samba-doc
+RUN apt-get install -y -qq samba samba-common smbclient cifs-utils samba-doc
 
 RUN echo "deb http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40/Debian_7.0 ./" > /etc/apt/sources.list.d/opsi.list
 
@@ -24,9 +24,9 @@ RUN apt-get update
 
 RUN apt-get -y remove tftpd
 
-RUN apt-get install -y opsi-atftpd
+RUN apt-get install -y -qq opsi-atftpd
 
-RUN apt-get install -y opsi-depotserver
+RUN apt-get install -y -qq opsi-depotserver
 
-RUN apt-get install -y opsi-configed
+RUN apt-get install -y -qq opsi-configed
 
