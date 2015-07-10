@@ -78,3 +78,4 @@ EXPOSE 4447 69/udp
 
 VOLUME ["/var/lib/opsi/", "/etc/opsi"]
 
+CMD echo "127.0.0.1 $HOSTNAME" > /etc/hosts
