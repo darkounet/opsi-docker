@@ -7,6 +7,8 @@ MAINTAINER Antoine GUEVARA <me@antoine-guevara.fr>
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOSTNAME opsi.docker.lan
+ENV OPSI_USER opsiuser
+ENV OPSI_PASSWORD OpsiPassword
 ENV cert_country="FR"
 ENV cert_state="docker"
 ENV cert_locality="docker"
@@ -74,8 +76,17 @@ RUN echo "127.0.0.1 $HOSTNAME" > /etc/hosts; apt-get install -y -qq opsi-depotse
 
 RUN echo "127.0.0.1 $HOSTNAME" > /etc/hosts; apt-get install -y -qq opsi-configed
 
-EXPOSE 4447 69/udp
+RUN /usr/sbin/useradd -m -s /bin/bash $OPSI_USER
+
+RUN echo "$OPSI_USER:$OPSI_PASSWORD" | chpasswd
+
+RUN echo -e "$OPSI_PASSWORD\n$OPSI_PASSWORD\n" smbpasswd -s -a $OPSI_USER
+
+RUN /usr/sbin/usermod -aG opsiadmin $OPSI_USER
+RUN /usr/sbin/usermod -aG pcpatch $OPSI_USER
 
 VOLUME ["/var/lib/opsi/", "/etc/opsi"]
 
-CMD echo "127.0.0.1 $HOSTNAME" > /etc/hosts
+ENTRYPOINT "/usr/bin/opsiconfd"
+
+EXPOSE 4447 69/udp
