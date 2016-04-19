@@ -4,11 +4,10 @@ FROM debian:wheezy
 
 MAINTAINER Antoine GUEVARA <me@antoine-guevara.fr>
 
-
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOSTNAME opsi.docker.lan
-ENV OPSI_USER opsiuser
-ENV OPSI_PASSWORD OpsiPassword
+ENV OPSI_USER = "$OPSI_USER"
+ENV OPSI_PASSWORD "$OPSI_PASSWORD"
 ENV cert_country="FR"
 ENV cert_state="docker"
 ENV cert_locality="docker"
@@ -86,6 +85,10 @@ RUN /usr/sbin/usermod -aG opsiadmin $OPSI_USER
 RUN /usr/sbin/usermod -aG pcpatch $OPSI_USER
 
 VOLUME ["/var/lib/opsi/", "/etc/opsi"]
+
+RUN apt-get clean
+
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT "/usr/bin/opsiconfd"
 
