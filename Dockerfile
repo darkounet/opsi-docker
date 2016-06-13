@@ -6,8 +6,6 @@ MAINTAINER Antoine GUEVARA <me@antoine-guevara.fr>
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOSTNAME opsi.docker.lan
-ENV OPSI_USER = "$OPSI_USER"
-ENV OPSI_PASSWORD "$OPSI_PASSWORD"
 ENV cert_country="FR"
 ENV cert_state="docker"
 ENV cert_locality="docker"
@@ -17,6 +15,8 @@ ENV cert_commonname="$HOSTNAME"
 ENV cert_email=""
 ENV tmp_opsiconfd_rand="/tmp/tmp_opsiconfd_rand"
 ENV tmp_opsiconfd_cnf="/tmp/tmp_opsiconfd_cnf"
+ENV OPSI_USER="$OPSI_USER"
+ENV OPSI_PASSWORD="$OPSI_PASSWORD"
 
 RUN apt-get update
 
@@ -67,13 +67,13 @@ RUN openssl x509 -subject -dates -fingerprint -noout -in /etc/opsi/opsiconfd.pem
 
 RUN apt-get -y remove tftpd
 
-RUN apt-get install -y -qq opsi-atftpd
+RUN echo $(grep $(hostname) /etc/hosts | cut -f1) $HOSTNAME >> /etc/hosts && apt-get install -y -qq opsi-atftpd
 
-RUN apt-get install -y -qq opsiconfd
+RUN echo $(grep $(hostname) /etc/hosts | cut -f1) $HOSTNAME >> /etc/hosts && apt-get install -y -qq opsiconfd
 
-RUN apt-get install -y -qq opsi-depotserver
+RUN echo $(grep $(hostname) /etc/hosts | cut -f1) $HOSTNAME >> /etc/hosts && apt-get install -y -qq opsi-depotserver
 
-RUN apt-get install -y -qq opsi-configed
+RUN echo $(grep $(hostname) /etc/hosts | cut -f1) $HOSTNAME >> /etc/hosts && apt-get install -y -qq opsi-configed
 
 RUN apt-get clean
 
@@ -81,8 +81,8 @@ RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 VOLUME ["/var/lib/opsi/", "/etc/opsi"]
 
-COPY ./scripts/entrypoint.sh /
+COPY ./scripts/entrypoint.sh /usr/local/bin/
 
-ENTRYPOINT "entrypoint.sh"
+ENTRYPOINT /usr/local/bin/entrypoint.sh
 
 EXPOSE 4447 69/udp
