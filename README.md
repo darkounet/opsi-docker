@@ -7,11 +7,39 @@
 
 ## Run
 
-` docker run -it -h <opsi_hostname> -p 0.0.0.0:4447:4447 opsi-docker -e OPSI_USER=opsi.username -e OPSI_PASSWORD=opsi.password `
 
-` docker exec -it opsi /usr/local/bin/entrypoint.sh`
 
-## Mysql ( alpha ... )
+## File backend
+
+```bash
+
+docker run -itd --name docker-opsi
+    -h opsi.docker.lan \
+    -v /srv/docker/var/lib/opsi/:/var/lib/opsi/ \
+    -v /srv/docker/etc/opsi/:/etc/opsi/ \
+    -p 0.0.0.0:4447:4447 \
+    -e OPSI_USER=sysadmin \
+    -e OPSI_PASSWORD=linux123 \
+    darkounet/opsi-docker
+
+```
+
+you need to run :
+
+
+```bash
+
+docker exec -it docker-opsi /usr/local/bin/entrypoint.sh
+
+```
+
+You can now connect to your OPSI via https://<DOCKER_IP>:4447 using sysadmin/linux123
+
+
+## Mysql backend ( alpha ... )
+
+You need to use docker-compose ( example coming asap )
+
 
 ### Vars
 
