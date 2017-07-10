@@ -31,6 +31,10 @@ apt-get -qq -o DPkg::options::=--force-confmiss --reinstall install python-opsi 
 
 /usr/bin/opsi-setup --set-rights
 
+/usr/bin/opsi-setup --auto-configure-samba
+
+/etc/init.d/samba start
+
 mkdir -p /var/lib/opsi/repository
 
 opsi-product-updater -vv
