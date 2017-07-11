@@ -41,4 +41,5 @@ VOLUME ["/var/lib/opsi/", "/etc/opsi/"]
 
 COPY ./scripts/entrypoint.sh /usr/local/bin/
 
-EXPOSE 139/tcp 445/tcp 4447/tcp 69/udp 137/udp 138/udp
+EXPOSE 139/tcp 445/tcp 4447/tcp 69/udp 137/udp 138/udp 69/udp
+

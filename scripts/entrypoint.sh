@@ -35,6 +35,8 @@ apt-get -qq -o DPkg::options::=--force-confmiss --reinstall install python-opsi 
 
 /etc/init.d/samba start
 
+/etc/init.d/openbsd-inetd start
+
 mkdir -p /var/lib/opsi/repository
 
 opsi-product-updater -vv
