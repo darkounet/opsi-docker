@@ -6,6 +6,10 @@ echo -e "$OPSI_PASSWORD\n$OPSI_PASSWORD\n" | smbpasswd -s -a $OPSI_USER
 /usr/sbin/usermod -aG opsiadmin $OPSI_USER
 /usr/sbin/usermod -aG pcpatch $OPSI_USER
 if [ "$OPSI_BACKEND" == "mysql" ]; then
+  debconf-set-selections <<< "mariadb-server mysql-server/root_password password ${OPSI_DB_ROOT_PASSWORD}"
+  debconf-set-selections <<< "mariadb-server mysql-server/root_password_again password ${OPSI_DB_ROOT_PASSWORD}"
+  apt install -y -qq mariadb-server mariadb-client mariadb-common
+  sleep 5
   /usr/bin/opsi-setup --configure-mysql --unattended='{"dbAdminPass": "'${OPSI_DB_ROOT_PASSWORD}'", "dbAdminUser":"root", "database":"'${OPSI_DB}'"}'
   /usr/bin/opsi-setup --update-mysql
   /etc/init.d/opsiconfd restart
@@ -19,5 +23,5 @@ apt-get -qq -o DPkg::options::=--force-confmiss --reinstall install python-opsi 
 /etc/init.d/samba start
 /etc/init.d/openbsd-inetd start
 mkdir -p /var/lib/opsi/repository
-opsi-package-updater -vv update
+opsi-package-updater -vv install
 
