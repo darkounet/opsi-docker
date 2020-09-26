@@ -8,6 +8,8 @@
 
 ## File backend
 
+Start container after building the image:
+
 ```bash
 docker run -itd --name docker-opsi
     -h opsi.docker.lan \
@@ -19,7 +21,7 @@ docker run -itd --name docker-opsi
     opsi-docker:4.1
 ```
 
-you need to run :
+For the initial setup after the first start you need to run:
 
 ```bash
 docker exec -it docker-opsi /usr/local/bin/entrypoint.sh
@@ -28,7 +30,30 @@ docker exec -it docker-opsi /usr/local/bin/entrypoint.sh
 
 You can now connect to your OPSI via https://<DOCKER_IP>:4447 using sysadmin/linux123
 
-## Mysql backend ( alpha ... )
+I created a dedicated network (vlan) for some container. Because I need the samba shares, configed, maybe bootimage.. I use the following command to start the container after building:
+
+```bash
+docker run -itd --name opsi-server \
+ -h opsi.localdomain \
+ --dns 192.168.1.1 \
+ --dns-search localdomain \
+ -v /media/dockerdata/opsi/var/lib/opsi/:/var/lib/opsi/ \
+ -v /media/dockerdata/opsi/etc/opsi/:/etc/opsi/ \
+ -v /media/dockerdata/opsi/var/lib/mysql/:/var/lib/mysql/ \
+ -v /media/dockerdata/opsi/etc/mysql/:/etc/mysql/ \
+ -e OPSI_USER=sysuser \
+ -e OPSI_PASSWORD=linux123 \
+ -e OPSI_BACKEND=mysql \
+ -e OPSI_DB_HOST=localhost \
+ -e OPSI_DB_OPSI_USER=opsi_db_user \
+ -e OPSI_DB_OPSI_PASSWORD=opsi_db_123_password \
+ -e OPSI_DB_ROOT_PASSWORD=root_db_123_password \
+ --network SERVER \
+ opsi-docker:4.1
+```
+
+
+## Mysql backend ( alpha ... ), NOT IN THIS IMAGE
 
 You need to use docker-compose (example coming asap)
 
@@ -75,6 +100,6 @@ configState_.*     : mysql, opsipxeconfd
 
 ## TODO
 
-* Mysql Backend
+* Mysql Backend -> **frustrating, not in this container, maybe linking container will work**
 * opsi-package-updater
 * custom repositories

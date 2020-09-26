@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV OPSI_USER="$OPSI_USER"
 ENV OPSI_PASSWORD="$OPSI_PASSWORD"
+# OPSI_BACKEND is FILE!
 ENV OPSI_BACKEND="$OPSI_BACKEND"
 ENV OPSI_DB_NAME="$OPSI_DB_NAME"
 ENV OPSI_DB_OPSI_USER="$OPSI_DB_OPSI_USER"
@@ -31,9 +32,8 @@ RUN apt install -y -qq opsi-tftpd-hpa opsi-server opsi-windows-support
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-VOLUME ["/var/lib/opsi/", "/etc/opsi/", "/etc/mysql", "/var/lib/mysql"]
+VOLUME ["/var/lib/opsi/", "/etc/opsi/"]
 
 COPY ./scripts/entrypoint.sh /usr/local/bin/
 
 EXPOSE 139/tcp 445/tcp 4447/tcp 69/udp 137/udp 138/udp 69/udp 22/tcp
-
