@@ -12,7 +12,7 @@ Start container after building the image:
 
 ```bash
 docker run -itd --name docker-opsi
-    -h opsi.docker.lan \
+    -h opsi.example.com \
     -v /srv/docker/var/lib/opsi/:/var/lib/opsi/ \
     -v /srv/docker/etc/opsi/:/etc/opsi/ \
     -p 0.0.0.0:4447:4447 \
@@ -34,22 +34,18 @@ I created a dedicated network (vlan) for some container. Because I need the samb
 
 ```bash
 docker run -itd --name opsi-server \
- -h opsi.localdomain \
+ -h opsi.example.com \
  --dns 192.168.1.1 \
  --dns-search localdomain \
  -v /media/dockerdata/opsi/var/lib/opsi/:/var/lib/opsi/ \
  -v /media/dockerdata/opsi/etc/opsi/:/etc/opsi/ \
- -v /media/dockerdata/opsi/var/lib/mysql/:/var/lib/mysql/ \
- -v /media/dockerdata/opsi/etc/mysql/:/etc/mysql/ \
- -e OPSI_USER=sysuser \
+ -e OPSI_USER=adminuser \
  -e OPSI_PASSWORD=linux123 \
- -e OPSI_BACKEND=mysql \
- -e OPSI_DB_HOST=localhost \
- -e OPSI_DB_OPSI_USER=opsi_db_user \
- -e OPSI_DB_OPSI_PASSWORD=opsi_db_123_password \
- -e OPSI_DB_ROOT_PASSWORD=root_db_123_password \
- --network SERVER \
+ --network DMZ \
  opsi-docker:4.1
+
+docker attach opsi-server (within 60 seconds for first initial setup)
+CTRL-p CTRL-q (to dettach)
 ```
 
 

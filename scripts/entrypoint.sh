@@ -1,58 +1,59 @@
 #!/bin/bash
-apt-get update -qq
+# This script will autostart all opsi services
+startsetup="unknown"
+setuptries=0
+while [ "$startsetup" = "unknown" ] && [ "$setuptries" -lt 4 ]; do
+  read  -t10 -r -n1 -p "Do you want to run the setup-script to start using this container? (y/N)" setupresponse
+  echo ""
+  case "$setupresponse" in
+    [yY])
+      startsetup="true"
+      setuptries=4
+      ;;
+    [nN])
+      startsetup="false"
+      setuptries=4
+      ;;
+    *)
+      startsetup="unknown"
+      let "setuptries++"
+      ;;
+  esac
+done
+
 /usr/sbin/useradd -m -s /bin/bash $OPSI_USER
 echo "$OPSI_USER:$OPSI_PASSWORD" | chpasswd
 echo -e "$OPSI_PASSWORD\n$OPSI_PASSWORD\n" | smbpasswd -s -a $OPSI_USER
 /usr/sbin/usermod -aG opsiadmin $OPSI_USER
 /usr/sbin/usermod -aG pcpatch $OPSI_USER
-apt install -o DPkg::options::=--force-confmiss --reinstall -y opsi-server opsiconfd python-opsi opsi-utils opsi-tftpd-hpa opsi-linux-bootimage opsi-windows-support
-sed -i '/^audit.* :/d' /etc/opsi/backendManager/dispatch.conf
-sed -i '/^softwareLicense.* :/d' /etc/opsi/backendManager/dispatch.conf
-sed -i '/^license.* :/d' /etc/opsi/backendManager/dispatch.conf
-sed -i '/^[^#]/s/mysql, //g' /etc/opsi/backendManager/dispatch.conf
-/usr/bin/opsi-setup --init-current-config
-/usr/bin/opsi-setup --update-file
-/usr/bin/opsi-setup --auto-configure-samba
-/usr/bin/opsi-setup --set-rights
-/usr/bin/opsiconfd -D start
-if [ "$OPSI_BACKEND" == "mysql" ]; then
-  echo "CURRENTLY NOT WORKING"
-#  apt purge -y mysql-server mysql-common
-#  apt update -qq
-#  debconf-set-selections <<< "mysql-server mysql-server/root_password password $OPSI_DB_ROOT_PASSWORD"
-#  debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $OPSI_DB_ROOT_PASSWORD"
-#  chown -R mysql:mysql /var/lib/mysql
-#  apt install -y -qq --reinstall mysql-server mysql-client mysql-common
-#  mysqld --initialize
-#  service mysql stop
 
-# chown -R mysql:mysql /var/lib/mysql
-#  mysqld_safe --skip-grant-tables &
-#  sleep 5
-#  mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD(\"$OPSI_DB_ROOT_PASSWORD\") WHERE user='root';"
-#  mysqladmin shutdown
-#  service mysql start
-#  sleep 5
-#  mysql -u root -p$OPSI_DB_ROOT_PASSWORD -e "ALTER USER 'root'@'localhost' IDENTIFIED BY \"$OPSI_DB_ROOT_PASSWORD\";"
-#  mysql -u root -p$OPSI_DB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
-#  sed '/^\[mysqld\]/a sql_mode=NO_ENGINE_SUBSTITUTION' /etc/mysql/mysql.conf.d/mysqld.cnf
-#  service mysql restart
-#  mkdir -p /etc/opsi/backends
-#  touch /etc/opsi/backends/mysql.conf
-#  /usr/bin/opsi-setup --init-current-config
-#  /usr/bin/opsi-setup --configure-mysql --unattended='{"dbAdminPass": "'$OPSI_DB_ROOT_PASSWORD'", "dbAdminUser":"root", "database":"'$OPSI_DB_NAME'"}'
-#  /usr/bin/opsi-setup --init-current-config
-#  /usr/bin/opsi-setup --update-mysql
-#  /usr/bin/opsi-setup --init-current-config
-#  /etc/init.d/opsiconfd restart
+if [ "$startsetup" = "true" ]; then
+  echo "Starting setup script"
+  echo "Please wait..."
+  /usr/local/bin/setup.sh
+  startsetup="false"
 fi
-#/usr/bin/opsi-setup --set-rights
+if [ "$startsetup" = "false" ] || [ "$startsetup" = "unknown" ]; then
+  /usr/bin/opsi-setup --set-rights
+  echo "Starting services"
+  /usr/bin/opsiconfd -D start
+  /usr/bin/opsipxeconfd start &
 
-#/etc/init.d/opsiconfd start
-#/usr/bin/opsi-setup --init-current-config
-#/usr/bin/opsi-setup --set-rights
-#/usr/bin/opsi-setup --auto-configure-samba
-#/etc/init.d/samba start
-#/etc/init.d/openbsd-inetd start
-#mkdir -p /var/lib/opsi/repository
-#opsi-package-updater -vv install
+  while true; do
+    runningconfd=$(pgrep opsiconfd)
+    if [ -z "$runningconfd" ]; then
+      echo "`date` [ERROR] opsiconfd not running. Starting again..."
+      /usr/bin/opsiconfd -D start
+    fi
+    unset runningconfd
+    runningpxeconfd=$(pgrep opsipxeconfd)
+    if [ -z "$runningpxeconfd" ]; then
+      echo "`date` [ERROR] opsipxeconfd not running. Starting again..."
+      /usr/bin/opsipxeconfd start &
+    fi
+    unset runningpxeconfd
+    sleep 20
+  done
+fi
+echo "Exit"
+
