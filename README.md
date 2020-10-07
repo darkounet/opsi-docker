@@ -11,24 +11,17 @@
 Start container after building the image:
 
 ```bash
-docker run -itd --name docker-opsi
-    -h opsi.example.com \
-    -v /srv/docker/var/lib/opsi/:/var/lib/opsi/ \
-    -v /srv/docker/etc/opsi/:/etc/opsi/ \
-    -p 0.0.0.0:4447:4447 \
-    -e OPSI_USER=sysadmin \
-    -e OPSI_PASSWORD=linux123 \
-    opsi-docker:4.1
+COMING SOON
 ```
 
 For the initial setup after the first start you need to run:
 
 ```bash
-docker exec -it docker-opsi /usr/local/bin/entrypoint.sh
+COMING SOON
 
 ```
 
-You can now connect to your OPSI via https://<DOCKER_IP>:4447 using sysadmin/linux123
+You can now connect to your OPSI via https://<DOCKER_IP>:4447 using given credentials
 
 I created a dedicated network (vlan) for some container. Because I need the samba shares, configed, maybe bootimage.. I use the following command to start the container after building:
 
@@ -41,7 +34,12 @@ docker run -itd --name opsi-server \
  -v /media/dockerdata/opsi/etc/opsi/:/etc/opsi/ \
  -e OPSI_USER=adminuser \
  -e OPSI_PASSWORD=linux123 \
+ -e OPSI_BACKEND=mysql \
+ -e OPSI_DB_HOST=192.168.1.83 \
+ -e OPSI_DB_OPSI_USER=opsiadmin \
+ -e OPSI_DB_OPSI_PASSWORD=my_db_p4ss \
  --network DMZ \
+ --ip 192.168.1.85 \
  opsi-docker:4.1
 
 docker attach opsi-server (within 60 seconds for first initial setup)

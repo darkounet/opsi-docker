@@ -11,7 +11,10 @@ sed -i '/^[^#]/s/mysql, //g' /etc/opsi/backendManager/dispatch.conf
 /usr/bin/opsi-setup --update-file
 /usr/bin/opsi-setup --auto-configure-samba
 /usr/bin/opsi-setup --patch-sudoers-file
+mv /root/opsipxeconfd.conf /etc/opsi/
 /usr/bin/opsi-setup --set-rights
+mkdir /var/run/opsipxeconfd
+chown root:opsiadmin /var/run/opsipxeconfd
 if [ "$OPSI_BACKEND" == "mysql" ]; then
   echo "CURRENTLY NOT WORKING"
 #  apt purge -y mysql-server mysql-common
@@ -53,4 +56,3 @@ fi
 #/etc/init.d/openbsd-inetd start
 #mkdir -p /var/lib/opsi/repository
 #opsi-package-updater -vv install
-

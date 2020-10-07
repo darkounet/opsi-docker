@@ -26,6 +26,8 @@ echo "$OPSI_USER:$OPSI_PASSWORD" | chpasswd
 echo -e "$OPSI_PASSWORD\n$OPSI_PASSWORD\n" | smbpasswd -s -a $OPSI_USER
 /usr/sbin/usermod -aG opsiadmin $OPSI_USER
 /usr/sbin/usermod -aG pcpatch $OPSI_USER
+mkdir /var/run/opsipxeconfd
+chown root:opsiadmin /var/run/opsipxeconfd
 
 if [ "$startsetup" = "true" ]; then
   echo "Starting setup script"
@@ -36,10 +38,22 @@ fi
 if [ "$startsetup" = "false" ] || [ "$startsetup" = "unknown" ]; then
   /usr/bin/opsi-setup --set-rights
   echo "Starting services"
+  /usr/sbin/smbd -D
+  /usr/sbin/in.tftpd -v --ipv4 --listen --address :69 --secure /tftpboot/
   /usr/bin/opsiconfd -D start
   /usr/bin/opsipxeconfd start &
 
   while true; do
+    runningsmbd=$(pgrep smbd)
+    if [ -z "$runningsmbd" ]; then
+      echo "`date` [ERROR] smbd not running. Starting again..."
+      /usr/sbin/smbd -D
+    fi
+    runningtftpd=$(pgrep in.tftpd)
+    if [ -z "$runningtftpd" ]; then
+      echo "`date` [ERROR] tftpd not running. Starting again..."
+      /usr/sbin/in.tftpd -v --ipv4 --listen --address :69 --secure /tftpboot/
+    fi
     runningconfd=$(pgrep opsiconfd)
     if [ -z "$runningconfd" ]; then
       echo "`date` [ERROR] opsiconfd not running. Starting again..."
@@ -56,4 +70,3 @@ if [ "$startsetup" = "false" ] || [ "$startsetup" = "unknown" ]; then
   done
 fi
 echo "Exit"
-
