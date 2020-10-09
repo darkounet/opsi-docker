@@ -16,43 +16,40 @@ mv /root/opsipxeconfd.conf /etc/opsi/
 mkdir /var/run/opsipxeconfd
 chown root:opsiadmin /var/run/opsipxeconfd
 if [ "$OPSI_BACKEND" == "mysql" ]; then
-  echo "CURRENTLY NOT WORKING"
-#  apt purge -y mysql-server mysql-common
-#  apt update -qq
-#  debconf-set-selections <<< "mysql-server mysql-server/root_password password $OPSI_DB_ROOT_PASSWORD"
-#  debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $OPSI_DB_ROOT_PASSWORD"
-#  chown -R mysql:mysql /var/lib/mysql
-#  apt install -y -qq --reinstall mysql-server mysql-client mysql-common
-#  mysqld --initialize
-#  service mysql stop
+  echo "USE WITH CAUTION"
+  # changing mysql.conf
+  if [ "$OPSI_DB_HOST" == "localhost" ]; then
+    echo "[ERROR] variable OPSI_DB_HOST can not be localhost"
+    exit 1
+  fi
+  sed -i "s/u\"localhost\"/u\"$OPSI_DB_HOST\"/g" /etc/opsi/backends/mysql.conf
 
-# chown -R mysql:mysql /var/lib/mysql
-#  mysqld_safe --skip-grant-tables &
-#  sleep 5
-#  mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD(\"$OPSI_DB_ROOT_PASSWORD\") WHERE user='root';"
-#  mysqladmin shutdown
-#  service mysql start
-#  sleep 5
-#  mysql -u root -p$OPSI_DB_ROOT_PASSWORD -e "ALTER USER 'root'@'localhost' IDENTIFIED BY \"$OPSI_DB_ROOT_PASSWORD\";"
-#  mysql -u root -p$OPSI_DB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
-#  sed '/^\[mysqld\]/a sql_mode=NO_ENGINE_SUBSTITUTION' /etc/mysql/mysql.conf.d/mysqld.cnf
-#  service mysql restart
-#  mkdir -p /etc/opsi/backends
-#  touch /etc/opsi/backends/mysql.conf
-#  /usr/bin/opsi-setup --init-current-config
-#  /usr/bin/opsi-setup --configure-mysql --unattended='{"dbAdminPass": "'$OPSI_DB_ROOT_PASSWORD'", "dbAdminUser":"root", "database":"'$OPSI_DB_NAME'"}'
-#  /usr/bin/opsi-setup --init-current-config
-#  /usr/bin/opsi-setup --update-mysql
-#  /usr/bin/opsi-setup --init-current-config
-#  /etc/init.d/opsiconfd restart
+  if [ "$OPSI_DB_NAME" == "" ]; then
+    echo "[ERROR] variable OPSI_DB_NAME must be set"
+    exit 1
+  fi
+  sed -i "/\"database\":/s/.*/    \"database\":                  u\"$OPSI_DB_NAME\",/" /etc/opsi/backends/mysql.conf
+
+  if [ "$OPSI_DB_OPSI_USER" == ""]; then
+    echo "[ERROR] variable OPSI_DB_OPSI_USER must be set"
+    exit 1
+  fi
+  sed -i "/\"username\":/s/.*/    \"username\":                  u\"$OPSI_DB_OPSI_USER\",/" /etc/opsi/backends/mysql.conf
+
+  if [ "$OPSI_DB_OPSI_PASSWORD" == ""]; then
+    echo "[ERROR] variable OPSI_DB_OPSI_PASSWORD not set. You should specify a connection password!"
+    exit 1
+  fi
+  sed -i "/\"password\":/s/.*/    \"password\":                  u\"$OPSI_DB_OPSI_PASSWORD\",/" /etc/opsi/backends/mysql.conf
+
+  sed -i "/^.\* : file/i license.* : mysql" /etc/opsi/backendManager/dispatch.conf
+  sed -i "/^.\* : file/i softwareLicense.* : mysql" /etc/opsi/backendManager/dispatch.conf
+  sed -i "/^.\* : file/i audit.* : mysql" /etc/opsi/backendManager/dispatch.conf
+  sed -i "s/^backend_.\* : file, opsipxeconfd/backend_.* : file, mysql, opsipxeconfd/g" /etc/opsi/backendManager/dispatch.conf
+  /usr/bin/opsi-setup --init-current-config
+  /usr/bin/opsi-setup --update-mysql
+  /usr/bin/opsi-setup --init-current-config
 fi
-#/usr/bin/opsi-setup --set-rights
+/usr/bin/opsi-setup --set-rights
 
-#/etc/init.d/opsiconfd start
-#/usr/bin/opsi-setup --init-current-config
-#/usr/bin/opsi-setup --set-rights
-#/usr/bin/opsi-setup --auto-configure-samba
-#/etc/init.d/samba start
-#/etc/init.d/openbsd-inetd start
-#mkdir -p /var/lib/opsi/repository
-#opsi-package-updater -vv install
+opsi-package-updater install

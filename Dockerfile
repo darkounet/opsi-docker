@@ -4,13 +4,13 @@ MAINTAINER Christopher KOEHLER <spam@koechr.de>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV OPSI_USER="$OPSI_USER"
-ENV OPSI_PASSWORD="$OPSI_PASSWORD"
-ENV OPSI_BACKEND="$OPSI_BACKEND"
-ENV OPSI_DB_HOST="$OPSI_DB_HOST"
-ENV OPSI_DB_NAME="$OPSI_DB_NAME"
-ENV OPSI_DB_OPSI_USER="$OPSI_DB_OPSI_USER"
-ENV OPSI_DB_OPSI_PASSWORD="$OPSI_DB_OPSI_PASSWORD"
+ENV OPSI_USER="adminuser"
+ENV OPSI_PASSWORD="linux123"
+ENV OPSI_BACKEND="file"
+ENV OPSI_DB_HOST=""
+ENV OPSI_DB_NAME="opsi"
+ENV OPSI_DB_OPSI_USER="opsiadmin"
+ENV OPSI_DB_OPSI_PASSWORD="linux123"
 
 RUN apt update -qq \
  && apt install -y -qq hostname apt-utils iputils-ping openssl net-tools openssh-client vim \
@@ -37,9 +37,8 @@ VOLUME ["/var/lib/opsi/", "/etc/opsi/"]
 COPY ./scripts/setup.sh /usr/local/bin/
 COPY ./scripts/entrypoint.sh /usr/local/bin/
 COPY ./scripts/opsipxeconfd.conf /root/
-#COPY ./scripts/backends/mysql.conf /etc/opsi/backends/
 
-EXPOSE 139/tcp 445/tcp 4447/tcp 69/udp 137/udp 138/udp 22/tcp
+EXPOSE 139/tcp 445/tcp 4447/tcp 69/udp 137/udp 138/udp
 
 ENTRYPOINT "/usr/local/bin/entrypoint.sh"
 
